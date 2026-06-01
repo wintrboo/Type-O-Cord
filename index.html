@@ -4,11 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Type-o-cord</title>
-<link rel="icon" type="image/png" href="/favicon.png">
-<link rel="icon" href="favicon.png" sizes="32x32" type="image/png">
-<link rel="icon" href="/favicon.png" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/favicon.png">
-<link rel="manifest" href="/favicon.png">
+<!-- Default favicon (fallback) -->
+<link rel="icon" href="/favicon_black.png" type="image/png">
+
+<!-- Light mode -->
+<link rel="icon"
+      href="/favicon_black.png"
+      type="image/png"
+      media="(prefers-color-scheme: light)">
+
+<!-- Dark mode -->
+<link rel="icon"
+      href="/favicon_white.png"
+      type="image/png"
+      media="(prefers-color-scheme: dark)">
+
+<!-- Apple devices -->
+<link rel="apple-touch-icon" href="/favicon_black.png">
+
+<!-- Site manifest -->
+<link rel="manifest" href="/site.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -60,6 +75,11 @@
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
+    transition: filter 0.3s;
+    background: #0d0f14;
+  }
+  body.light #particles-bg {
+    filter: invert(1);
   }
   #particles-bg canvas {
     display: block;
