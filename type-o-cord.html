@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Type-o-cord</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161d;
+    --bg3: #1a1d26;
+    --bg4: #21252f;
+    --surface: #252931;
+    --surface2: #2e333d;
+    --border: #333844;
+    --accent: #00d4c8;
+    --accent2: #7b68ee;
+    --accent3: #ff6b9d;
+    --text: #e8eaf0;
+    --text2: #9ba3b8;
+    --text3: #5c6478;
+    --success: #43b581;
+    --font-ui: 'Inter', sans-serif;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  .light {
+    --bg: #f0f2f8;
+    --bg2: #e8eaf2;
+    --bg3: #ffffff;
+    --bg4: #f8f9fc;
+    --surface: #ffffff;
+    --surface2: #eef0f6;
+    --border: #d0d4e0;
+    --text: #1a1d26;
+    --text2: #4a5068;
+    --text3: #8a93a8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* LAYOUT */
+  .app { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+  .logo-svg { flex-shrink: 0; }
+  .logo-title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+  .logo-sub { font-size: 12px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; margin-top: 1px; }
+  .header-controls { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text2);
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg4); }
+  .icon-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,212,200,0.08); }
+
+  /* THEME PICKER */
+  .theme-panel {
+    position: fixed; top: 80px; right: 20px; z-index: 100;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    width: 220px;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .theme-panel.open { display: block; }
+  .theme-panel h4 { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .theme-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .theme-row label { font-size: 13px; color: var(--text2); flex: 1; }
+  .theme-row input[type="color"] {
+    width: 36px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg4);
+    cursor: pointer;
+    padding: 2px;
+  }
+  .preset-swatches { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .swatch {
+    width: 24px; height: 24px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: transform 0.1s;
+  }
+  .swatch:hover { transform: scale(1.15); border-color: var(--text); }
+
+  /* SECTION */
+  .section {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .section-header span { color: var(--accent); font-size: 14px; }
+
+  /* COMPOSE AREA */
+  .compose-container { padding: 14px; }
+  .compose-toolbar {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 10px 14px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .fmt-btn {
+    padding: 5px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+  .fmt-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .fmt-btn.special { border-style: dashed; }
+  .toolbar-sep { width: 1px; background: var(--border); margin: 2px 2px; align-self: stretch; }
+  textarea#composer {
+    width: 100%;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 14px;
+    resize: vertical;
+    min-height: 140px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea#composer:focus { border-color: var(--accent); }
+  textarea#composer::placeholder { color: var(--text3); }
+  .compose-actions {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px; justify-content: flex-end;
+  }
+  .btn-primary {
+    padding: 8px 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: var(--radius);
+    color: #fff; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--font-ui);
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-ghost {
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text2); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--font-ui);
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+  .char-count { font-size: 12px; color: var(--text3); margin-right: auto; }
+
+  /* TIMESTAMP SECTION */
+  .ts-input-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px;
+  }
+  .ts-datetime {
+    flex: 1;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+    padding: 9px 14px;
+    outline: none;
+    font-family: var(--font-ui);
+    transition: border-color 0.15s;
+    color-scheme: dark;
+  }
+  .ts-datetime:focus { border-color: var(--accent); }
+  .ts-now-btn {
+    padding: 9px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: var(--font-ui);
+    transition: all 0.15s;
+  }
+  .ts-now-btn:hover { background: rgba(0,212,200,0.1); border-color: var(--accent); }
+
+  /* TIMESTAMP ROWS */
+  .ts-rows { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .ts-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.15s;
+  }
+  .ts-row:hover { border-color: var(--accent); }
+  .ts-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(0,212,200,0.08);
+    padding: 4px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ts-preview {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ts-copy-btn {
+    width: 32px; height: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text3);
+    font-size: 15px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .ts-copy-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,212,200,0.08); }
+  .ts-copy-btn.copied { color: var(--success); border-color: var(--success); background: rgba(67,181,129,0.1); }
+
+  /* PREVIEW PANEL */
+  .preview-box {
+    margin: 0 14px 14px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 60px;
+    font-family: var(--font-ui);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .preview-box .preview-bold { font-weight: 700; }
+  .preview-box .preview-italic { font-style: italic; }
+  .preview-box .preview-underline { text-decoration: underline; }
+  .preview-box .preview-strike { text-decoration: line-through; }
+  .preview-box .preview-code {
+    background: rgba(0,212,200,0.12);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 0 5px;
+    border-radius: 4px;
+  }
+  .preview-box .preview-codeblock {
+    display: block;
+    background: var(--bg2);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    margin: 6px 0;
+    border: 1px solid var(--border);
+  }
+  .preview-box .preview-quote {
+    border-left: 3px solid var(--accent2);
+    padding-left: 12px;
+    color: var(--text2);
+    margin: 4px 0;
+  }
+  .preview-box .preview-h1 { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text); }
+  .preview-box .preview-h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); }
+  .preview-box .preview-h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); }
+  .preview-box .preview-sub { font-size: 12px; color: var(--text3); }
+  .preview-box .preview-link { color: var(--accent2); text-decoration: underline; cursor: pointer; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* MASKED LINK DIALOG */
+  .dialog-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    display: none; align-items: center; justify-content: center;
+  }
+  .dialog-overlay.open { display: flex; }
+  .dialog {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 380px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  }
+  .dialog h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .dialog input {
+    width: 100%; background: var(--bg4); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); padding: 9px 14px;
+    font-size: 14px; font-family: var(--font-ui); outline: none; margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+  .dialog input:focus { border-color: var(--accent); }
+  .dialog label { font-size: 12px; color: var(--text3); font-weight: 500; display: block; margin-bottom: 4px; }
+  .dialog-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .ts-row { grid-template-columns: 1fr auto; }
+    .ts-code { display: none; }
+    .compose-toolbar { gap: 4px; }
+    .fmt-btn { padding: 4px 7px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-area">
+      <svg class="logo-svg" width="42" height="42" viewBox="0 0 42 42" fill="none">
+        <rect width="42" height="42" rx="10" fill="url(#grad)"/>
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="42" y2="42">
+            <stop offset="0%" stop-color="#00d4c8"/>
+            <stop offset="100%" stop-color="#7b68ee"/>
+          </linearGradient>
+        </defs>
+        <!-- Chat bubble with T -->
+        <path d="M10 12 Q10 9 13 9 H29 Q32 9 32 12 V22 Q32 25 29 25 H24 L19 31 L19 25 H13 Q10 25 10 22 Z" fill="rgba(255,255,255,0.95)"/>
+        <text x="21" y="21" font-family="Syne,sans-serif" font-size="11" font-weight="800" fill="#7b68ee" text-anchor="middle" dominant-baseline="middle">Tc</text>
+      </svg>
+      <div>
+        <div class="logo-title">Type-o-cord</div>
+        <div class="logo-sub">Discord Message Toolkit</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button class="icon-btn" id="themeToggle" title="Toggle light/dark mode">🌙</button>
+      <button class="icon-btn" id="paletteBtn" title="Custom theme">🎨</button>
+    </div>
+  </header>
+
+  <!-- THEME PANEL -->
+  <div class="theme-panel" id="themePanel">
+    <h4>Custom Theme</h4>
+    <div class="theme-row">
+      <label>Accent Color</label>
+      <input type="color" id="accentColor" value="#00d4c8">
+    </div>
+    <div class="theme-row">
+      <label>Secondary Accent</label>
+      <input type="color" id="accent2Color" value="#7b68ee">
+    </div>
+    <h4 style="margin-top:12px">Presets</h4>
+    <div class="preset-swatches">
+      <div class="swatch" style="background:linear-gradient(135deg,#00d4c8,#7b68ee)" title="Default" data-a="#00d4c8" data-b="#7b68ee"></div>
+      <div class="swatch" style="background:linear-gradient(135deg,#ff6b9d,#c44dff)" title="Pink" data-a="#ff6b9d" data-b="#c44dff"></div>
+      <div class="swatch" style="background:linear-gradient(135deg,#ff9a3c,#ff6b9d)" title="Sunset" data-a="#ff9a3c" data-b="#ff6b9d"></div>
+      <div class="swatch" style="background:linear-gradient(135deg,#43b581,#7b68ee)" title="Forest" data-a="#43b581" data-b="#7b68ee"></div>
+      <div class="swatch" style="background:linear-gradient(135deg,#f0c040,#ff6b4a)" title="Ember" data-a="#f0c040" data-b="#ff6b4a"></div>
+      <div class="swatch" style="background:linear-gradient(135deg,#5865f2,#eb459e)" title="Discord" data-a="#5865f2" data-b="#eb459e"></div>
+    </div>
+  </div>
+
+  <!-- MESSAGE COMPOSER -->
+  <div class="section">
+    <div class="section-header">
+      <span>✏️</span> Message Composer
+    </div>
+    <!-- TOOLBAR -->
+    <div class="compose-toolbar">
+      <button class="fmt-btn" data-fmt="bold" title="Bold (**text**)"><strong>B</strong></button>
+      <button class="fmt-btn" data-fmt="italic" title="Italic (*text*)"><em>I</em></button>
+      <button class="fmt-btn" data-fmt="underline" title="Underline (__text__)"><u>U</u></button>
+      <button class="fmt-btn" data-fmt="strike" title="Strikethrough (~~text~~)"><s>S</s></button>
+      <button class="fmt-btn" data-fmt="bolditalic" title="Bold Italic (***text***)"><strong><em>BI</em></strong></button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" data-fmt="h1" title="Heading 1 (# )"># H1</button>
+      <button class="fmt-btn" data-fmt="h2" title="Heading 2 (## )">## H2</button>
+      <button class="fmt-btn" data-fmt="h3" title="Heading 3 (### )">### H3</button>
+      <button class="fmt-btn" data-fmt="subtext" title="Subtext (-# )">-# Sub</button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" data-fmt="bullet" title="Bullet list (- )">• List</button>
+      <button class="fmt-btn" data-fmt="quote" title="Block quote (> )">&gt; Quote</button>
+      <button class="fmt-btn" data-fmt="multiquote" title="Multi-line quote (>>> )">&gt;&gt;&gt; Quote+</button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" data-fmt="code" title="Inline code (`code`)">` Code</button>
+      <button class="fmt-btn" data-fmt="codeblock" title="Code block (```code```">``` Block</button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn special" data-fmt="maskedlink" title="Masked link [text](url)">🔗 Link</button>
+    </div>
+    <div class="compose-container">
+      <textarea id="composer" placeholder="Write your Discord message here... Select text and click a format button above to apply formatting."></textarea>
+      <div class="compose-actions">
+        <span class="char-count" id="charCount">0 / 2000</span>
+        <button class="btn-ghost" onclick="clearComposer()">Clear</button>
+        <button class="btn-primary" onclick="copyComposer()">Copy Message</button>
+      </div>
+    </div>
+    <!-- LIVE PREVIEW -->
+    <div class="section-header" style="border-top:1px solid var(--border)">
+      <span>👁️</span> Discord Preview
+    </div>
+    <div class="preview-box" id="previewBox">Your message preview will appear here…</div>
+  </div>
+
+  <!-- TIMESTAMP CONVERTER -->
+  <div class="section">
+    <div class="section-header">
+      <span>⏰</span> Timestamp Converter
+    </div>
+    <div class="ts-input-row">
+      <input type="datetime-local" id="tsInput" class="ts-datetime">
+      <button class="ts-now-btn" onclick="setNow()">⚡ Now</button>
+    </div>
+    <div class="ts-rows" id="tsRows"></div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<!-- MASKED LINK DIALOG -->
+<div class="dialog-overlay" id="linkDialog">
+  <div class="dialog">
+    <h3>Insert Masked Link</h3>
+    <label>Display Text</label>
+    <input type="text" id="linkText" placeholder="Click here">
+    <label>URL</label>
+    <input type="text" id="linkUrl" placeholder="https://discord.com">
+    <div class="dialog-actions">
+      <button class="btn-ghost" onclick="closeLinkDialog()">Cancel</button>
+      <button class="btn-primary" onclick="insertMaskedLink()">Insert</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let isLight = false;
+let savedSelection = null;
+
+// ─── THEME ───
+const themeToggle = document.getElementById('themeToggle');
+const paletteBtn = document.getElementById('paletteBtn');
+const themePanel = document.getElementById('themePanel');
+
+themeToggle.addEventListener('click', () => {
+  isLight = !isLight;
+  document.body.classList.toggle('light', isLight);
+  themeToggle.textContent = isLight ? '🌑' : '🌙';
+  const dtInput = document.getElementById('tsInput');
+  dtInput.style.colorScheme = isLight ? 'light' : 'dark';
+});
+
+paletteBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  themePanel.classList.toggle('open');
+  paletteBtn.classList.toggle('active');
+});
+document.addEventListener('click', () => {
+  themePanel.classList.remove('open');
+  paletteBtn.classList.remove('active');
+});
+themePanel.addEventListener('click', e => e.stopPropagation());
+
+document.getElementById('accentColor').addEventListener('input', e => {
+  document.documentElement.style.setProperty('--accent', e.target.value);
+});
+document.getElementById('accent2Color').addEventListener('input', e => {
+  document.documentElement.style.setProperty('--accent2', e.target.value);
+});
+document.querySelectorAll('.swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    const a = s.dataset.a, b = s.dataset.b;
+    document.documentElement.style.setProperty('--accent', a);
+    document.documentElement.style.setProperty('--accent2', b);
+    document.getElementById('accentColor').value = a;
+    document.getElementById('accent2Color').value = b;
+  });
+});
+
+// ─── COMPOSER ───
+const composer = document.getElementById('composer');
+const charCount = document.getElementById('charCount');
+
+composer.addEventListener('input', () => {
+  const len = composer.value.length;
+  charCount.textContent = `${len} / 2000`;
+  charCount.style.color = len > 1800 ? '#ff6b4a' : 'var(--text3)';
+  updatePreview();
+});
+
+function clearComposer() {
+  composer.value = '';
+  charCount.textContent = '0 / 2000';
+  updatePreview();
+}
+
+function copyComposer() {
+  if (!composer.value.trim()) return;
+  navigator.clipboard.writeText(composer.value).then(() => showToast('Message copied!'));
+}
+
+// ─── FORMATTING ───
+document.querySelectorAll('.fmt-btn[data-fmt]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const fmt = btn.dataset.fmt;
+    if (fmt === 'maskedlink') { openLinkDialog(); return; }
+    applyFormat(fmt);
+  });
+});
+
+function applyFormat(fmt) {
+  const ta = composer;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+  const before = ta.value.substring(0, start);
+  const after = ta.value.substring(end);
+
+  let result;
+  const isLineFormat = ['h1','h2','h3','subtext','bullet','quote','multiquote'].includes(fmt);
+
+  if (isLineFormat) {
+    // Line-level: apply to each selected line or insert prefix at cursor
+    const prefix = { h1:'# ', h2:'## ', h3:'### ', subtext:'-# ', bullet:'- ', quote:'> ', multiquote:'>>> ' }[fmt];
+    if (sel.includes('\n')) {
+      const lines = sel.split('\n');
+      result = before + lines.map(l => prefix + l).join('\n') + after;
+    } else {
+      // Toggle: if line already has prefix, remove it
+      const lineStart = before.lastIndexOf('\n') + 1;
+      const lineText = ta.value.substring(lineStart, end);
+      if (lineText.startsWith(prefix)) {
+        result = ta.value.substring(0, lineStart) + lineText.substring(prefix.length) + ta.value.substring(end);
+      } else {
+        result = ta.value.substring(0, lineStart) + prefix + ta.value.substring(lineStart);
+      }
+    }
+  } else {
+    const wrapMap = {
+      bold: ['**','**'],
+      italic: ['*','*'],
+      underline: ['__','__'],
+      strike: ['~~','~~'],
+      bolditalic: ['***','***'],
+      code: ['`','`'],
+      codeblock: ['```\n', '\n```'],
+    };
+    const [open, close] = wrapMap[fmt];
+    result = before + open + (sel || 'text') + close + after;
+  }
+
+  ta.value = result;
+  ta.dispatchEvent(new Event('input'));
+  ta.focus();
+}
+
+// ─── MASKED LINK ───
+let savedCursorPos = 0;
+function openLinkDialog() {
+  savedCursorPos = composer.selectionStart;
+  const sel = composer.value.substring(composer.selectionStart, composer.selectionEnd);
+  document.getElementById('linkText').value = sel || '';
+  document.getElementById('linkUrl').value = '';
+  document.getElementById('linkDialog').classList.add('open');
+  document.getElementById('linkText').focus();
+}
+function closeLinkDialog() {
+  document.getElementById('linkDialog').classList.remove('open');
+}
+function insertMaskedLink() {
+  const text = document.getElementById('linkText').value || 'link';
+  const url = document.getElementById('linkUrl').value || 'https://';
+  const snippet = `[${text}](${url})`;
+  const ta = composer;
+  const before = ta.value.substring(0, savedCursorPos);
+  const after = ta.value.substring(ta.selectionEnd || savedCursorPos);
+  ta.value = before + snippet + after;
+  ta.dispatchEvent(new Event('input'));
+  closeLinkDialog();
+}
+document.getElementById('linkDialog').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeLinkDialog();
+});
+
+// ─── DISCORD PREVIEW ───
+function updatePreview() {
+  const raw = composer.value;
+  const preview = document.getElementById('previewBox');
+  if (!raw.trim()) {
+    preview.textContent = 'Your message preview will appear here…';
+    return;
+  }
+  preview.innerHTML = renderDiscordMarkdown(raw);
+}
+
+function renderDiscordMarkdown(text) {
+  const lines = text.split('\n');
+  let html = '';
+  let inCodeBlock = false;
+  let codeAccum = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    if (line.trim().startsWith('```')) {
+      if (!inCodeBlock) {
+        inCodeBlock = true;
+        codeAccum = '';
+      } else {
+        inCodeBlock = false;
+        html += `<span class="preview-codeblock">${escapeHtml(codeAccum.trim())}</span>`;
+        codeAccum = '';
+      }
+      continue;
+    }
+    if (inCodeBlock) { codeAccum += line + '\n'; continue; }
+
+    if (line.startsWith('### ')) { html += `<span class="preview-h3">${renderInline(line.slice(4))}</span><br>`; continue; }
+    if (line.startsWith('## ')) { html += `<span class="preview-h2">${renderInline(line.slice(3))}</span><br>`; continue; }
+    if (line.startsWith('# ')) { html += `<span class="preview-h1">${renderInline(line.slice(2))}</span><br>`; continue; }
+    if (line.startsWith('-# ')) { html += `<span class="preview-sub">${renderInline(line.slice(3))}</span><br>`; continue; }
+    if (line.startsWith('>>> ')) { html += `<span class="preview-quote">${renderInline(line.slice(4))}</span><br>`; continue; }
+    if (line.startsWith('> ')) { html += `<span class="preview-quote">${renderInline(line.slice(2))}</span><br>`; continue; }
+    if (line.startsWith('- ') || line.startsWith('* ')) { html += `• ${renderInline(line.slice(2))}<br>`; continue; }
+
+    html += renderInline(line) + '<br>';
+  }
+  return html;
+}
+
+function renderInline(text) {
+  let t = escapeHtml(text);
+  t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span class="preview-link">$1</span>');
+  t = t.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/__(.+?)__/g, '<span class="preview-underline">$1</span>');
+  t = t.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  t = t.replace(/_(.+?)_/g, '<em>$1</em>');
+  t = t.replace(/~~(.+?)~~/g, '<span class="preview-strike">$1</span>');
+  t = t.replace(/`([^`]+)`/g, '<span class="preview-code">$1</span>');
+  return t;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── TIMESTAMPS ───
+const FORMATS = [
+  { code: 'F', label: 'Full Long', fn: d => d.toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'2-digit',hour:'2-digit',minute:'2-digit'}) },
+  { code: 'f', label: 'Full Short', fn: d => d.toLocaleString('en-US',{year:'numeric',month:'long',day:'2-digit',hour:'2-digit',minute:'2-digit'}) },
+  { code: 'D', label: 'Long Date', fn: d => d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'2-digit'}) },
+  { code: 'd', label: 'Short Date', fn: d => d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) },
+  { code: 't', label: 'Short Time', fn: d => d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) },
+  { code: 'T', label: 'Long Time', fn: d => d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) },
+  { code: 'R', label: 'Relative', fn: d => getRelative(d) },
+  { code: 's', label: 'Short Datetime', fn: d => d.toLocaleString('en-US',{month:'2-digit',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) },
+  { code: 'S', label: 'Long Datetime', fn: d => d.toLocaleString('en-US',{month:'2-digit',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) },
+];
+
+function getRelative(d) {
+  const diff = Math.round((d - Date.now()) / 1000);
+  const abs = Math.abs(diff);
+  const future = diff >= 0;
+  if (abs < 60) return future ? `in ${abs} seconds` : `${abs} seconds ago`;
+  if (abs < 3600) { const m = Math.round(abs/60); return future ? `in ${m} minute${m>1?'s':''}` : `${m} minute${m>1?'s':''} ago`; }
+  if (abs < 86400) { const h = Math.round(abs/3600); return future ? `in ${h} hour${h>1?'s':''}` : `${h} hour${h>1?'s':''} ago`; }
+  const days = Math.round(abs/86400);
+  return future ? `in ${days} day${days>1?'s':''}` : `${days} day${days>1?'s':''} ago`;
+}
+
+function setNow() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const val = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  document.getElementById('tsInput').value = val;
+  renderTimestamps();
+}
+
+function renderTimestamps() {
+  const input = document.getElementById('tsInput').value;
+  const rows = document.getElementById('tsRows');
+  if (!input) { rows.innerHTML = ''; return; }
+  const d = new Date(input);
+  if (isNaN(d)) { rows.innerHTML = ''; return; }
+  const unix = Math.floor(d.getTime() / 1000);
+
+  rows.innerHTML = FORMATS.map(f => {
+    const code = `<t:${unix}:${f.code}>`;
+    const preview = f.fn(d);
+    return `<div class="ts-row">
+      <span class="ts-code">${code}</span>
+      <span class="ts-preview">${preview}</span>
+      <button class="ts-copy-btn" onclick="copyTs(this,'${code}')" title="Copy">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function copyTs(btn, code) {
+  navigator.clipboard.writeText(code).then(() => {
+    btn.classList.add('copied');
+    showToast('Timestamp copied!');
+    setTimeout(() => btn.classList.remove('copied'), 1500);
+  });
+}
+
+document.getElementById('tsInput').addEventListener('change', renderTimestamps);
+
+// ─── TOAST ───
+let toastTimeout;
+function showToast(msg = 'Copied!') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── INIT ───
+setNow();
+</script>
+</body>
+</html>
