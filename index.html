@@ -188,6 +188,61 @@
   }
   .section-header span { color: var(--accent); font-size: 14px; }
 
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+  .info-box a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .info-box a:hover {
+    color: var(--accent2);
+  }
+
+  .info-box-bottom {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    color: var(--text);
+    margin-top: 16px;
+    line-height: 1.75;
+    overflow: hidden;
+    transform: rotate(3deg);
+    opacity: 0.1;
+    transition: transform 0.8s ease, opacity 0.8s ease;
+  }
+  .info-box-bottom.visible {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  .info-box-bottom a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .info-box-bottom a:hover {
+    color: var(--accent2);
+  }
+  .info-box-bottom .scroll-word {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(10px);
+    transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease;
+    will-change: opacity, transform, filter;
+  }
+  .info-box-bottom.visible .scroll-word {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
   /* COMPOSE AREA */
   .compose-container { padding: 14px; }
   .compose-toolbar {
@@ -303,6 +358,28 @@
     transition: border-color 0.15s;
   }
   .ts-row:hover { border-color: var(--accent); }
+  .ts-row.most-used {
+    position: relative;
+  }
+  .most-used-badge {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 0 var(--bg4);
+    z-index: 1;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+  }
   .ts-code {
     font-family: var(--font-mono);
     font-size: 12px;
@@ -448,8 +525,8 @@
   display: flex;
   align-items: center;
   white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-
 </style> 
 
 <script data-goatcounter="https://wintrboo.goatcounter.com/count"
@@ -477,11 +554,11 @@
         </svg>
       <div>
         <div class="logo-title">Type-o-cord</div>
-        <div class="logo-sub">Discord Message Toolkit</div>
+        <div class="logo-sub">Discord Text Tool by WintrBoo</div>
       </div>
     </div>
     <div class="header-controls">
-      <div class="visitor-counter" id="visitorCounter">👥 <span id="visitCount">0</span></div>
+      <div class="visitor-counter" id="visitorCounter">Coming soon</div>
       <button class="icon-btn" id="themeToggle" title="Toggle light/dark mode"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
         <defs>
           <linearGradient id="moonGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
@@ -601,6 +678,12 @@
       <button class="ts-now-btn" onclick="setNow()"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;vertical-align:middle;margin-right:5px"><defs><linearGradient id="boltGrad" x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent2)"/></linearGradient></defs><path fill="url(#boltGrad)" d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h6.572l-1.305 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 17.25 8h-6.572l1.305-6.093Z"></path></svg> Now</button>
     </div>
     <div class="ts-rows" id="tsRows"></div>
+  </div>
+
+  <div class="info-box-bottom scroll-reveal">
+    <p class="scroll-reveal-text">
+      Hello, i am WintrBoo and i host events for a discord server with more than 50k members and whenever i wanted to announce an event i had to use two seperate websites for text formatting and a time generator (count down) so to make things easier me and my friend from <a href="https://www.neverendever.com" target="_blank" rel="noopener noreferrer">https://www.neverendever.com</a> came together and created <a href="https://typeocord.com" target="_blank" rel="noopener noreferrer">https://typeocord.com</a> to make the hassle of Text Formatting and Timestamp Converting easier and we put it in one single website.
+    </p>
   </div>
 
 </div>
@@ -875,10 +958,18 @@ function renderTimestamps() {
   if (isNaN(d)) { rows.innerHTML = ''; return; }
   const unix = Math.floor(d.getTime() / 1000);
 
-  rows.innerHTML = FORMATS.map(f => {
+  const sortedFormats = [...FORMATS].sort((a,b) => {
+    if (a.code === 'R') return -1;
+    if (b.code === 'R') return 1;
+    return 0;
+  });
+
+  rows.innerHTML = sortedFormats.map(f => {
     const code = `<t:${unix}:${f.code}>`;
     const preview = f.fn(d);
-    return `<div class="ts-row">
+    const isMostUsed = f.code === 'R';
+    return `<div class="ts-row${isMostUsed ? ' most-used' : ''}">
+      ${isMostUsed ? '<div class="most-used-badge">Most Used</div>' : ''}
       <span class="ts-code">${code}</span>
       <span class="ts-preview">${preview}</span>
       <button class="ts-copy-btn" onclick="copyTs(this,'${code}')" title="Copy">
@@ -910,15 +1001,62 @@ function showToast(msg = 'Copied!') {
   toastTimeout = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// Visitor Counter Demo
-let visits = parseInt(localStorage.getItem('typeocord_visits') || '0');
-visits++;
-localStorage.setItem('typeocord_visits', visits);
-
-document.getElementById('visitCount').textContent = visits;
+// Visitor counter removed — static "Coming soon" message displayed instead.
 
 // ─── INIT ───
 setNow();
+initScrollReveal();
+
+function initScrollReveal() {
+  const reveals = document.querySelectorAll('.scroll-reveal');
+  if (!reveals.length) return;
+
+  reveals.forEach(container => {
+    const textEl = container.querySelector('.scroll-reveal-text');
+    if (!textEl) return;
+
+    const walker = document.createTreeWalker(textEl, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach(textNode => {
+      const text = textNode.textContent;
+      if (!text.trim()) return;
+
+      const parts = text.split(/(\s+)/);
+      const fragment = document.createDocumentFragment();
+
+      parts.forEach(part => {
+        if (part.trim() === '') {
+          fragment.appendChild(document.createTextNode(part));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'scroll-word';
+          span.textContent = part;
+          fragment.appendChild(span);
+        }
+      });
+
+      textNode.parentNode.replaceChild(fragment, textNode);
+    });
+
+    const words = textEl.querySelectorAll('.scroll-word');
+    words.forEach((word, index) => {
+      word.style.transitionDelay = `${index * 0.04}s`;
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  reveals.forEach(el => observer.observe(el));
+}
 
 // ─── PARTICLES BACKGROUND ───
 (async () => {
