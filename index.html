@@ -24,7 +24,10 @@
 
 <!-- Site manifest -->
 <link rel="manifest" href="/site.webmanifest">
-<link href="<link href="https://fonts.cdnfonts.com/css/lemonmilk" rel="stylesheet">" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @import url('https://fonts.cdnfonts.com/css/lemonmilk');
+</style>
 <style>
   :root {
     --bg: rgba(13,15,20,0.45);
@@ -42,7 +45,8 @@
     --text3: #5c6478;
     --success: #43b581;
     --font-ui: 'Inter', sans-serif;
-    --font-display: 'Syne', sans-serif;
+    --font-display: 'Lemon/Milk', sans-serif;
+    --font-display-light: 'Lemon/Milk light', sans-serif;
     --font-mono: 'DM Mono', monospace;
     --radius: 8px;
     --radius-lg: 12px;
@@ -112,13 +116,13 @@
   .logo-svg { flex-shrink: 0; }
   .logo-title {
     font-family: var(--font-display);
-    font-size: 26px;
-    font-weight: 800;
+    font-size: 28px;
+    font-weight: 900;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: -0.5px;
+    letter-spacing: 0.1px;
   }
   .logo-sub { font-size: 12px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; margin-top: 1px; }
   .header-controls { display: flex; align-items: center; gap: 10px; }
@@ -477,7 +481,7 @@
         </svg>
       <div>
         <div class="logo-title">Type-o-cord</div>
-        <div class="logo-sub">Discord Message Tool by WintrBoo</div>
+        <div class="logo-sub">Discord Messages Tool by WintrBoo</div>
       </div>
     </div>
     <div class="header-controls">
