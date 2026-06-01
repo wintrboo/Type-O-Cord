@@ -295,6 +295,19 @@
   .ts-copy-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,212,200,0.08); }
   .ts-copy-btn.copied { color: var(--success); border-color: var(--success); background: rgba(67,181,129,0.1); }
 
+  <!-- VISITOR COUNTER -->
+<div class="section">
+  <div class="section-header">
+    <span>📊</span> Site Counter
+  </div>
+  <div style="padding:14px;">
+    <div class="ts-row">
+      <span class="ts-code">VISITS</span>
+      <span class="ts-preview" id="visitCount">Loading...</span>
+    </div>
+  </div>
+</div>
+
   /* PREVIEW PANEL */
   .preview-box {
     margin: 0 14px 14px;
@@ -813,6 +826,27 @@ function showToast(msg = 'Copied!') {
 
 // ─── INIT ───
 setNow();
+  // ─── VISITOR COUNTER ───
+async function loadVisitorCount() {
+  try {
+    const namespace = "type-o-cord";
+    const key = "visits";
+
+    const response = await fetch(
+      `https://api.countapi.xyz/hit/${namespace}/${key}`
+    );
+
+    const data = await response.json();
+
+    document.getElementById("visitCount").textContent =
+      data.value.toLocaleString() + " total visits";
+  } catch (err) {
+    document.getElementById("visitCount").textContent =
+      "Unable to load count";
+  }
+}
+
+loadVisitorCount();
 </script>
 </body>
 </html>
